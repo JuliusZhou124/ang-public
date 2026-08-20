@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Format
+        run: cargo fmt --all -- --check
+
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets
+
+      - name: Test
+        run: cargo test --workspace
+
+  # The headline number in the README must stay reproducible from the checked-in
+  # real-cluster fixtures, through the real CLI, not just from a unit test.
+  fuzz-real-trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Ingest the real 8-node cluster trace
+        run: |
+          F=fault/tests/fixtures
+          cargo run -q -p cli -- trace-store ingest-job     --db trace.db $F/real_job_3.eventlog.jsonl
+          cargo run -q -p cli -- trace-store ingest-message --db trace.db $F/real_job_3.node*.messages.jsonl
+
+      - name: Fuzz 1000 seeds and assert the documented failure rate
+        run: |
+          # `ang fuzz` exits non-zero when seeds fail, which is the expected outcome here.
+          cargo run -q -p cli -- fuzz --job-id 1 --db trace.db --seeds 0 1000 --exhaustive > out.txt || true
+          cat out.txt
+          grep -q 'failing: 147 (14.70%)' out.txt
+          grep -q 'first failure: seed 7' out.txt

@@ -1,0 +1,87 @@
+# An 8-node Slurm cluster (slurm-wlm 21.08.5, no --privileged), used to capture
+# the real 189-event trace checked in under fault/tests/fixtures/. Each worker
+# runs a real slurmd; boundary hooks and the LD_PRELOAD shim are wired in below.
+# Build the binaries first: cargo build --release -p cli -p intercept --lib --examples
+services:
+  munge-init:
+    build: .
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        test -s /etc/munge/munge.key || /usr/sbin/create-munge-key
+        chown munge:munge /etc/munge/munge.key
+        chmod 400 /etc/munge/munge.key
+        mkdir -p /var/log/ang/messages
+        chmod 777 /var/log/ang/messages
+    volumes:
+      - munge_key:/etc/munge
+      - messages:/var/log/ang/messages
+
+  slurmctld:
+    build: .
+    hostname: slurmctld
+    command: ["slurmctld"]
+    depends_on:
+      munge-init:
+        condition: service_completed_successfully
+    environment:
+      ANG_BOUNDARY_DIR: /var/log/ang/boundary
+    volumes:
+      - munge_key:/etc/munge
+      - boundary:/var/log/ang/boundary
+      - ../target/release/ang:/usr/local/bin/ang:ro
+    networks: [slurm-net]
+
+  node1: &node
+    build: .
+    hostname: node1
+    command: ["slurmd"]
+    depends_on: [slurmctld]
+    environment:
+      ANG_BOUNDARY_DIR: /var/log/ang/boundary
+    volumes:
+      - munge_key:/etc/munge
+      - boundary:/var/log/ang/boundary
+      - messages:/var/log/ang/messages
+      - ../target/release/ang:/usr/local/bin/ang:ro
+      - ../target/release/libintercept.so:/usr/local/lib/libintercept.so:ro
+      - ../target/release/examples/sender:/usr/local/bin/msg-sender:ro
+      - ../target/release/examples/receiver:/usr/local/bin/msg-receiver:ro
+    networks: [slurm-net]
+
+  node2:
+    <<: *node
+    hostname: node2
+
+  node3:
+    <<: *node
+    hostname: node3
+
+  node4:
+    <<: *node
+    hostname: node4
+
+  node5:
+    <<: *node
+    hostname: node5
+
+  node6:
+    <<: *node
+    hostname: node6
+
+  node7:
+    <<: *node
+    hostname: node7
+
+  node8:
+    <<: *node
+    hostname: node8
+
+volumes:
+  munge_key:
+  boundary:
+  messages:
+
+networks:
+  slurm-net:
+    driver: bridge

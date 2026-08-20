@@ -1,0 +1,7 @@
+{"job_id":"1","timestamp_ms":1783021105397,"kind":"node_allocated","node":"node1","user":"root","work_dir":"/"}
+{"job_id":"1","timestamp_ms":1783021105397,"kind":"node_allocated","node":"node2","user":"root","work_dir":"/"}
+{"job_id":"1","timestamp_ms":1783021105412,"kind":"task_started","step_id":"0","task_id":"1","node":"node2"}
+{"job_id":"1","timestamp_ms":1783021105412,"kind":"task_started","step_id":"0","task_id":"0","node":"node1"}
+{"job_id":"1","timestamp_ms":1783021105416,"kind":"task_exited","step_id":"0","task_id":"0","node":"node1"}
+{"job_id":"1","timestamp_ms":1783021105416,"kind":"task_exited","step_id":"0","task_id":"1","node":"node2"}
+{"job_id":"1","timestamp_ms":1783021105425,"kind":"job_exited","exit_code":0,"signal":0,"job_name":"hostname","node_list":"node[1-2]"}

@@ -1,0 +1,3 @@
+/target
+*.eventlog.jsonl
+!fault/tests/fixtures/*.eventlog.jsonl

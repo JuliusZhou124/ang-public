@@ -1,0 +1,8 @@
+[package]
+name = "runtime"
+version = "0.1.0"
+edition.workspace = true
+
+[dependencies]
+recorder = { path = "../recorder" }
+anyhow.workspace = true

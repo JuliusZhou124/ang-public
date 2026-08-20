@@ -1,0 +1,7 @@
+{"job_id":"1","timestamp_ms":1783890102246,"kind":"node_allocated","node":"node2","user":"root","work_dir":"/"}
+{"job_id":"1","timestamp_ms":1783890102246,"kind":"node_allocated","node":"node1","user":"root","work_dir":"/"}
+{"job_id":"1","timestamp_ms":1783890102268,"kind":"task_started","step_id":"0","task_id":"0","node":"node1"}
+{"job_id":"1","timestamp_ms":1783890102269,"kind":"task_started","step_id":"0","task_id":"1","node":"node2"}
+{"job_id":"1","timestamp_ms":1783890103506,"kind":"task_exited","step_id":"0","task_id":"0","node":"node1"}
+{"job_id":"1","timestamp_ms":1783890103557,"kind":"task_exited","step_id":"0","task_id":"1","node":"node2"}
+{"job_id":"1","timestamp_ms":1783890103566,"kind":"job_exited","exit_code":0,"signal":0,"job_name":"bash","node_list":"node[1-2]"}
